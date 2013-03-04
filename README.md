@@ -54,8 +54,13 @@ If you are using jQuerymobile, add this to your initialisation to track pages vi
     		console.log('error google analytics '+err)
     	}
     });
-    
-    
+
+SSL may be enabled or disabled, by default SSL is disabled.
+
+    ga_storage._enableSSL();
+    ga_storage._disableSSL();
+
+
 Which Analytics type to choose?
 ===============================
 

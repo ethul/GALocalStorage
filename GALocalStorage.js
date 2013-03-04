@@ -57,13 +57,14 @@
         var that = this;
         var initialized = false;
         
-        var tracking_code_url = 'http://www.google-analytics.com/ga.js';
-        var beacon_url = 'http://www.google-analytics.com/__utm.gif';
+        var ga_url = 'http://www.google-analytics.com';
+        var ga_ssl_url = 'https://ssl.google-analytics.com';
         var last_url = '/'; // used to keep track of last page view logged to pass forward to subsequent events tracked
         var last_nav_url = '/'; // used to keep track of last page actually visited by the user (not popup_hidden or popup_blurred!)
         var last_page_title = '-'; // used to keep track of last page view logged to pass forward to subsequent events tracked
         var timer; // used for blur/focus state changes
         
+        var ga_use_ssl = false; // set by calling _enableSSL or _disableSSL
         var utmac = false; // set by calling _setAccount
         var utmhn = false; // set by calling _setDomain
         var utmwv = '4.3'; // tracking api version
@@ -99,6 +100,12 @@
         var custom_vars = visitor_custom_vars._get() ? JSON.parse(visitor_custom_vars._get()) : ['dummy'];
         
         var request_cnt = 0;
+
+        function beacon_url() {
+          return (
+            ga_use_ssl ? ga_ssl_url : ga_url
+          ) + '/__utm.gif';
+        }
         
         function rand(min, max) {
             return min + Math.floor(Math.random() * (max - min));
@@ -168,6 +175,18 @@
             }
 
         }
+
+        // public
+        this._enableSSL = function() {
+            if(IS_DEBUG) console.log("Enabling SSL");
+            ga_use_ssl = true;
+        };
+
+        // public
+        this._disableSSL = function() {
+            if(IS_DEBUG) console.log("Disabling SSL");
+            ga_use_ssl = false;
+        };
 
         // public
         this._setAccount = function(account_id) {
@@ -278,7 +297,7 @@
                 params.utme = event;
             }
             
-            var url = beacon_url + generate_query_string(params);
+            var url = beacon_url() + generate_query_string(params);
             var img = new Image();
             img.src = url;
         };
@@ -339,7 +358,7 @@
                 utmac: utmac,
                 utmcc: return_cookies(source, medium, campaign)
             };
-            var url = beacon_url + generate_query_string(params);
+            var url = beacon_url() + generate_query_string(params);
             var img = new Image();
             img.src = url;
         };
